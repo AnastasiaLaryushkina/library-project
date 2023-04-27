@@ -1,19 +1,21 @@
 package ru.itgirl.libraryproject.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.itgirl.libraryproject.dto.AuthorDto;
+import ru.itgirl.libraryproject.dto.AuthorsAndBooksResponseDto;
 import ru.itgirl.libraryproject.dto.BookDto;
-import ru.itgirl.libraryproject.dto.GenreDto;
 import ru.itgirl.libraryproject.model.Author;
 import ru.itgirl.libraryproject.model.Book;
 import ru.itgirl.libraryproject.model.Genre;
-import ru.itgirl.libraryproject.repository.AuthorRepository;
 import ru.itgirl.libraryproject.repository.BookRepository;
 import ru.itgirl.libraryproject.repository.GenreRepository;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.*;
+
+
+
 
 @Service
 @RequiredArgsConstructor
@@ -22,35 +24,42 @@ public class GenreServiceImpl implements GenreService {
     private final GenreRepository genreRepository;
 
     @Override
-    public GenreDto getGenreById(Long id) {
-        Genre genre = genreRepository.findById(id).orElseThrow();
-        GenreDto genreDto = convertEntityToDto(genre);
-        return genreDto;
+    public AuthorsAndBooksResponseDto getGenreById(Long id) {
+        try {
+            Genre genre = genreRepository.findById(id).orElseThrow(()-> new EntityNotFoundException());
+            return convertToDto(genre);
+        }  catch (EntityNotFoundException e) {
+            return new AuthorsAndBooksResponseDto("Такой жанр отсутствует", Collections.EMPTY_LIST);
+        }
     }
 
-    private GenreDto convertEntityToDto(Genre genre) {
-        List<BookDto> bookDtoList = bookRepository.findByGenre(genre)
-                .stream()
-                .map(book -> BookDto.builder()
-                        .id(book.getId())
-                        .name(book.getName())
-                        .authors(getAuthorsForBook(book))
-                        .build())
-                        .collect(Collectors.toList());
-        return GenreDto.builder()
-                .id(genre.getId())
-                .name(genre.getName())
-                .books(bookDtoList)
+    private AuthorsAndBooksResponseDto convertToDto(Genre genre) {
+        List <Book> bookList = bookRepository.findByGenre(genre);
+        Map<Author, List<Book>> authorToBooksMap = new HashMap<>();
+        for (Book book : bookList) {
+            for (Author author : book.getAuthors()) {
+                List<Book> books = authorToBooksMap.get(author);
+                if (books == null) {
+                    books = new ArrayList<>();
+                    authorToBooksMap.put(author, books);
+                }
+                books.add(book);
+            }
+        }
+
+        List<AuthorDto> authorDtoList = new ArrayList<>();
+        for (Map.Entry<Author, List<Book>> entry : authorToBooksMap.entrySet()) {
+            Author author = entry.getKey();
+            List<BookDto> authorBookDto = new ArrayList<>();
+            for (Book book : entry.getValue()) {
+                authorBookDto.add(new BookDto(book.getId(), book.getName(), null));
+            }
+            authorDtoList.add(new AuthorDto(author.getId(), author.getName(), author.getSurname(), authorBookDto));
+
+        }
+        return AuthorsAndBooksResponseDto.builder()
+                .genre(genre.getName())
+                .authors(authorDtoList)
                 .build();
-    }
-
-    private List<AuthorDto> getAuthorsForBook(Book book){
-        return book.getAuthors().stream()
-                .map(author -> AuthorDto.builder()
-                        .id(author.getId())
-                        .name(author.getName())
-                        .surname(author.getSurname())
-                        .build())
-                .collect(Collectors.toList());
     }
 }
