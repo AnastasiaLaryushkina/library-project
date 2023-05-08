@@ -12,5 +12,5 @@ import ru.itgirl.libraryproject.model.Genre;
 @Data
 public class BookCreateDto {
     private String name;
-    private Genre genre;
+    private String genre;
 }

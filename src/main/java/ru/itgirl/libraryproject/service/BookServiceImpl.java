@@ -9,7 +9,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ru.itgirl.libraryproject.dto.BookCreateDto;
 import ru.itgirl.libraryproject.dto.BookDto;
+import ru.itgirl.libraryproject.dto.BookUpdateDto;
+import ru.itgirl.libraryproject.dto.GenreCreateDto;
 import ru.itgirl.libraryproject.model.Book;
+import ru.itgirl.libraryproject.model.Genre;
 import ru.itgirl.libraryproject.repository.BookRepository;
 
 @Service
@@ -17,6 +20,7 @@ import ru.itgirl.libraryproject.repository.BookRepository;
 public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
+    private final GenreService genreService;
     @Override
     public BookDto getByNameV1(String name) {
         Book book = bookRepository.findBookByName(name).orElseThrow();
@@ -49,15 +53,39 @@ public class BookServiceImpl implements BookService {
         //2 Получить его id из таблицы Genre
         //3 Сформировать bookCreateDto где есть название книги и GenreDto
         //4  и теперь можно сохранять
-        Book book = bookRepository.save(convertDtoToEntity(bookCreateDto));
+        GenreCreateDto genreCreateDto = genreService.getGenreByName(bookCreateDto.getGenre());
+        Book book = bookRepository.save(convertDtoToEntity(bookCreateDto, genreCreateDto));
         BookDto bookDto = convertEntityToDto(book);
         return bookDto;
     }
 
-    private Book convertDtoToEntity(BookCreateDto bookCreateDto) {
+    @Override
+    public BookDto updateBook(BookUpdateDto bookUpdateDto) {
+        Book book = bookRepository.findById(bookUpdateDto.getId()).orElseThrow();
+        Genre genre = genreService.getGenreByName2(bookUpdateDto.getGenre());
+
+        book.setName(bookUpdateDto.getName());
+        book.setGenre(genre);
+
+        Book savedBook = bookRepository.save(book);
+        BookDto bookDto = convertEntityToDto(savedBook);
+        return bookDto;
+    }
+
+    @Override
+    public void deleteBook(Long id) {
+        bookRepository.deleteById(id);
+    }
+
+    private Book convertDtoToEntity(BookCreateDto bookCreateDto,GenreCreateDto genreCreateDto) {
+        Genre genre = Genre.builder()
+                .name(genreCreateDto.getName())
+                .id(genreCreateDto.getId())
+                .build();
+
         return Book.builder()
                 .name(bookCreateDto.getName())
-                .genre(bookCreateDto.getGenre())
+                .genre(genre)
                 .build();
     }
 

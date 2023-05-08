@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.itgirl.libraryproject.dto.AuthorDto;
 import ru.itgirl.libraryproject.dto.AuthorsAndBooksResponseDto;
 import ru.itgirl.libraryproject.dto.BookDto;
+import ru.itgirl.libraryproject.dto.GenreCreateDto;
 import ru.itgirl.libraryproject.model.Author;
 import ru.itgirl.libraryproject.model.Book;
 import ru.itgirl.libraryproject.model.Genre;
@@ -31,6 +32,24 @@ public class GenreServiceImpl implements GenreService {
         }  catch (EntityNotFoundException e) {
             return new AuthorsAndBooksResponseDto("Такой жанр отсутствует", Collections.EMPTY_LIST);
         }
+    }
+
+    @Override
+    public GenreCreateDto getGenreByName(String genreName) {
+        Genre genre = genreRepository.findByName(genreName).orElseThrow();
+        return convertGenreToDto(genre);
+    }
+
+    @Override
+    public Genre getGenreByName2(String genreName) {
+        return genreRepository.findByName(genreName).orElseThrow();
+    }
+
+    private GenreCreateDto convertGenreToDto(Genre genre) {
+        return GenreCreateDto.builder()
+                .name(genre.getName())
+                .id(genre.getId())
+                .build();
     }
 
     private AuthorsAndBooksResponseDto convertToDto(Genre genre) {

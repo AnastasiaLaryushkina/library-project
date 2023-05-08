@@ -35,5 +35,11 @@ public class Book {
     private Set<Author> authors;
 
 
+    public void setName(String name) {
+        this.name = name;
+    }
 
+    public void setGenre(Genre genre) {
+        this.genre = genre;
+    }
 }
