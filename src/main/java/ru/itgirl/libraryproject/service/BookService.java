@@ -1,5 +1,6 @@
 package ru.itgirl.libraryproject.service;
 
+import ru.itgirl.libraryproject.dto.BookCreateDto;
 import ru.itgirl.libraryproject.dto.BookDto;
 
 public interface BookService {
@@ -7,4 +8,6 @@ public interface BookService {
     BookDto getByNameV1(String name);
     BookDto getByNameV2(String name);
     BookDto getByNameV3(String name);
+
+    BookDto createBook(BookCreateDto bookCreateDto);
 }
