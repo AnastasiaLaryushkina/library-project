@@ -1,14 +1,13 @@
-package ru.itgirl.libraryproject.controller;
+package ru.itgirl.libraryproject.controller.rest;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.itgirl.libraryproject.dto.*;
-import ru.itgirl.libraryproject.model.Book;
 import ru.itgirl.libraryproject.service.BookService;
 
 @RestController
 @RequiredArgsConstructor
-public class BookController {
+public class BookRestController {
 
     private final BookService bookService;
 

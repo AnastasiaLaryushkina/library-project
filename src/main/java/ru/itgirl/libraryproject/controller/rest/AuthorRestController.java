@@ -1,4 +1,4 @@
-package ru.itgirl.libraryproject.controller;
+package ru.itgirl.libraryproject.controller.rest;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -9,7 +9,7 @@ import ru.itgirl.libraryproject.service.AuthorService;
 
 @RestController
 @RequiredArgsConstructor
-public class AuthorController {
+public class AuthorRestController {
 
     private final AuthorService authorService;
 
