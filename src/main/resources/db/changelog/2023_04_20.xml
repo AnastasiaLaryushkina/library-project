@@ -32,6 +32,34 @@
             FOREIGN KEY (author_id) REFERENCES author (id)
             );
 
+            Create table if not exists users (
+            id bigserial PRIMARY KEY,
+            username varchar NOT NULL,
+            password varchar NOT NULL);
+
+            Create table if not exists roles (
+            id serial PRIMARY KEY,
+            name varchar NOT NULL);
+
+            Create table if not exists users_roles (
+            user_id bigint NOT NULL,
+            role_id bigint NOT NULL,
+            PRIMARY KEY (user_id, role_id),
+            FOREIGN KEY (user_id) REFERENCES users (id),
+            FOREIGN KEY (role_id) REFERENCES roles (id));
+
+            Insert into roles(name) values
+            ('ROLE_USER'),
+            ('ROLE_ADMIN');
+
+            Insert into users(username, password) values
+            ('user', '$2a$12$hmOVte3dSAYeh2VmP46HH.L12qrP82O6x4mrv1oecRYIxcCfYmm8y'),
+            ('admin','$2a$12$hmOVte3dSAYeh2VmP46HH.L12qrP82O6x4mrv1oecRYIxcCfYmm8y');
+
+            Insert into users_roles(user_id, role_id) values
+            (1, 1),
+            (2, 2);
+
             Insert into author(name, surname) values
             ('Александр', 'Пушкин'),
             ('Николай', 'Гоголь'),
