@@ -2,6 +2,7 @@ package ru.itgirl.libraryproject.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.itgirl.libraryproject.dto.AuthorDto;
 import ru.itgirl.libraryproject.dto.AuthorsAndBooksResponseDto;
@@ -20,17 +21,22 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GenreServiceImpl implements GenreService {
     private final BookRepository bookRepository;
     private final GenreRepository genreRepository;
 
     @Override
     public AuthorsAndBooksResponseDto getGenreById(Long id) {
-        try {
-            Genre genre = genreRepository.findById(id).orElseThrow(()-> new EntityNotFoundException());
-            return convertToDto(genre);
-        }  catch (EntityNotFoundException e) {
-            return new AuthorsAndBooksResponseDto("Такой жанр отсутствует", Collections.EMPTY_LIST);
+        log.info("Try to find genre by id {}", id);
+        Optional<Genre> genre = genreRepository.findById(id);
+        if (genre.isPresent()) {
+            AuthorsAndBooksResponseDto authorsAndBooksResponseDto = convertToDto(genre.get());
+            log.info("Genre: {}", authorsAndBooksResponseDto.getGenre());
+            return authorsAndBooksResponseDto;
+        } else {
+            log.error("Genre with id: {} not found", id);
+            throw new IllegalStateException("Жанр не найден");
         }
     }
 
